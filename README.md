@@ -1,7 +1,7 @@
 #说明
 这是官方提供的学习Pixi的文档，我做了翻译，方便查阅和复习
 翻译当中有不准确的，请多多指正。
-[官方 github 地址](https://github.com/kittykatattack/learningPixi)
+[官方原文地址](https://github.com/kittykatattack/learningPixi)
 
 `翻译：吴佳`
 
@@ -31,7 +31,7 @@
 10. [继承自一个图片集来制作精灵（来自雪碧图等）](#tileset)
 11. [定义一个‘纹理’的集合（理解为使用定义好的 json 文件或者对象来制作）](#textureatlas)
 12. [加载’纹理‘集合](#loadingatlas)
-13. [使用一个定义了‘纹理’的集合创建精灵](#createsprites)
+13. [使用’纹理‘集合 创建精灵](#createsprites)
 14. [移动精灵](#movingsprites)
 15. [使用精灵的‘速度’属性](#velocity)
 16. [Game states](#gamestates)
@@ -671,74 +671,49 @@ Level** 最小值 `0`. 这些设置保证在使用免费版时候不会报错)
 	"pivot": {"x":0.5,"y":0.5}
 },
 ```
-The `treasureHunter.json` file also contains “dungeon.png”,
-“door.png”, "exit.png", and "explorer.png" properties each with
-similar data. Each of these sub-images are called **frames**. Having
-this data is really helpful because now you don’t need to know the
-size and position of each sub-image in the tileset. All you need to
-know is the sprite’s **frame id**. The frame id is just the name
-of the original image file, like "blob.png" or "explorer.png".
 
-Among the many advantages to using a texture atlas is that you can
-easily add 2 pixels of padding around each image (Texture Packer does
-this by default.) This is important to prevent the possibility of
-**texture bleed**. Texture bleed is an effect that happens when the
-edge of an adjacent image on the tileset appears next to a sprite.
-This happens because of the way your computer's GPU (Graphics
-Processing Unit) decides how to round fractional pixels values. Should
-it round them up or down? This will be different for each GPU.
-Leaving 1 or 2 pixels spacing around images on a tilseset makes all
-images display consistently.
+json 文件包含所有的子图像文件，每个子图像称之为**frames**，根据这些数据存储了精灵的位置、大小等，你需要知道精灵的**frame id**,帧 id 为原图像名称：'xx.png';使用texture atlas（纹理瓦片集）很方便，你可以很容易给每个图像添加2 像素的边距，而且是默认增加了2px 的间距。Pixi 这样做是为了兼容计算位置、大小时不同环境造成的四舍五入计算的偏差。留下1到2像素保证所有平台图像显示一致。
 
-(Note: If you have two pixels of padding around a graphic, and you still notice a strange "off by one pixel" glitch in the
-way Pixi is displaying it, try changing the texture's scale mode
-algorithm. Here's how: `texture.baseTexture.scaleMode =
-PIXI.SCALE_MODES.NEAREST;`. These glitches can sometimes happen
-because of GPU floating point rounding errors.)
+(注意: 如果你看到默认增加2px 边距后还有一个1px的毛刺，可以设置`texture.baseTexture.scaleMode =
+PIXI.SCALE_MODES.NEAREST;`来改变，这种情况极少出现。这是由于部分GPU 的浮点运算舍入误差造成的)
 
-Now that you know how to create a texture atlas, let's find out how to
-load it into your game code.
+接下来我们看看如何加载json 文件
 
 <a id='loadingatlas'></a>
 加载’纹理‘集合
 -------------------------
 
-To get the texture atlas into Pixi, load it using Pixi’s
-`loader`. If the JSON file was made with Texture Packer, the
-`loader` will interpret the data and create a texture from each
-frame on the tileset automatically.  Here’s how to use the `loader` to load the `treasureHunter.json`
-file. When it has loaded, the `setup` function will run.
+使用Pixi加载`texture atlas`, 仍然使用Pixi的`loader`:
+
 ```js
 loader
   .add("images/treasureHunter.json")
   .load(setup);
 ```
-Each image on the tileset is now an individual texture in Pixi’s
-cache. You can access each texture in the cache with the same name it
-had in Texture Packer (“blob.png”, “dungeon.png”, “explorer.png”,
-etc.).
+
+json中的每个图像会加载到texture缓存中，使用图像原名称访问这些 texture，进而创建 sprite 精灵
 
 <a id='creatingsprites'></a>
-使用一个定义了‘纹理’的集合创建精灵
+使用’纹理‘集合 创建精灵
 --------------------------------------------
 
-Pixi gives you three general ways to create a sprite from a texture atlas:
+Pixi 提供了三种方法从`texture atlas`创建一个精灵
 
-1.	Using `TextureCache`:
+1.	使用 `TextureCache`:
+
 ```js
 var texture = TextureCache["frameId.png"],
     sprite = new Sprite(texture);
 ```
-2.	If you’ve used Pixi’s `loader` to load the texture atlas, use the 
-loader’s `resources`:
+2.	如果你使用了 Pixi的 `loader` 加载texture atlas, 使用 loader 的 `resources`:
+
 ```js
 var sprite = new Sprite(
   resources["images/treasureHunter.json"].textures["frameId.png"]
 );
 ```
-3. That’s way too much to typing to have to do just to create a sprite! 
-So I suggest you create an alias called `id` that points to texture’s 
-altas’s `textures` object, like this:
+3. 建议创建一个 id 指向`textures`对象
+
 ```js
 var id = PIXI.loader.resources["images/treasureHunter.json"].textures; 
 ```
@@ -746,11 +721,11 @@ Then you can just create each new sprite like this:
 ```js
 let sprite = new Sprite(id["frameId.png"]);
 ```
-Much better!
 
-Here's how you could use these three different sprite creation
-techniques in the `setup` function to create and display the
-`dungeon`, `explorer`, and `treasure` sprites.
+很爽吧!
+
+下面代码演示了几种方法加载 json、创建精灵
+
 ```js
 //Define variables that might be used in more 
 //than one function
